@@ -1,0 +1,215 @@
+//justin schumann
+#include <iostream> 
+#include <string> 
+#include <vector>
+#include <sstream>
+#include <fstream>
+#include <algorithm>  
+#include <time.h> 
+
+
+
+
+using namespace std;
+
+void DisplayManue() { // text for course options 
+    cout << "Op.1: Load data" << endl;
+    cout << "Op.2: print list of courses" << endl;
+    cout << "Op.3: Print courses" << endl;
+    cout << "Op.9: exist" << endl;
+
+}
+
+struct Course { // listing our main values 
+    string cID; 
+    string cName;
+    vector<string> preRequis; 
+}; 
+
+struct Node { //here we start to build our nodes for the Binary tree 
+    Course courses; 
+    Node* left; 
+    Node* right;
+
+    Node() {
+    left = nullptr;
+    right = nullptr; 
+    }
+    Node(Course course) : Node() {
+        this->courses = course;
+    }
+};
+class BinarySearchTree { 
+    private:
+    void Destruct(Node* node); 
+    public: 
+    Node* root; 
+    BinarySearchTree();
+    virtual ~BinarySearchTree();
+    void Insert(BinarySearchTree* tree, Node* node);
+    void Search(string cID);
+    void PrintCourse(Node*node);
+
+
+}; 
+BinarySearchTree::BinarySearchTree() {
+    root = nullptr;
+};
+BinarySearchTree::~BinarySearchTree() {
+    Destruct(root);
+};
+void BinarySearchTree::Search(string cID) {
+    Node* currentNode = root;
+    while(currentNode = nullptr) {
+        if(currentNode->courses.cID == cID) {
+            cout << currentNode->courses.cID << ", ";
+            cout << currentNode->courses.cName;
+            cout << endl;
+             cout << "Prerequisites: ";
+            for(string preRequis: currentNode->courses.preRequis) {
+                if(preRequis == currentNode->courses.preRequis.back()) {
+                    cout << preRequis << endl;
+                }
+                else {
+                    cout << preRequis << ", ";
+                }
+            }
+            return;
+        }
+         else if (cID > currentNode->courses.cID) { 
+         if (currentNode->left != nullptr) {
+            currentNode = currentNode->left;
+        }
+    }
+    else {
+        currentNode = currentNode->right;
+    } 
+    }
+    cout << "Course: " << cID << "not on file." << endl;
+}
+void BinarySearchTree::Insert(BinarySearchTree*tree, Node* node) {
+    if(tree->root = nullptr) {
+        tree->root = node;
+    }
+    else{
+        Node * curr = tree->root;
+        while(curr != nullptr) {
+            if(node->courses.cID < curr->courses.cID) {
+                if(curr->left == nullptr) {
+                    curr->left = node;
+                    curr = nullptr;
+                }
+                else {
+                    curr = curr->left; 
+                }
+            }
+            else {
+                if(curr->right = nullptr) {
+                    curr->right = node; 
+                    curr = nullptr; 
+                }
+                else {
+                    curr = curr->right; 
+                }
+            }
+        }
+    }
+}
+void BinarySearchTree::PrintCourse(Node* node) {
+    if(node = nullptr) {
+        return;
+    }
+    PrintCourse(node->left);
+    cout << node->courses.cID << ", ";
+    cout << node->courses.cName << endl;
+    PrintCourse(node->right); 
+};
+void LoadCourse(string fileName, BinarySearchTree* b_S_T) {
+    ifstream file(fileName);
+    if(file.is_open()) {
+        cout << "Loading complete." << endl; 
+        int n;
+        string l;
+        string w; 
+        while(getline(file, l)) {
+            n = 0;
+            Node* node = new Node();
+            stringstream str(l);
+
+            while(n < 2) {
+                getline(str, w, ',');
+                if(n == 0) {
+                    node->courses.cID = w;
+                }
+                else {
+                    node->courses.cName = w;
+
+                }
+                n++; 
+            }
+            while(getline(str, w, ',')) {
+                node->courses.preRequis.push_back(w);
+            }
+            b_S_T->Insert(b_S_T, node); 
+        }
+    }
+    else {
+        cout << "FILE ERROR: Try again." << endl; \
+        return;
+    }
+}
+void main() { //making our main function 
+    BinarySearchTree* b_S_T = new BinarySearchTree();
+    string fChoice;
+    string cChoice; 
+
+    int userInput = 0; 
+
+    cout << "Welcome. Course Planer starts here." << endl << endl; 
+
+    while(userInput !=9 ) { //each case represent a option 
+        DisplayManue();
+        cin >> userInput; 
+
+        switch(userInput) {
+            case 1:
+            cout << endl;
+            cout << "give name of file that you wish to Load. Course.csv is default" << endl;
+            cin >> fChoice; 
+
+            LoadCourse(fChoice, b_S_T);
+            cout << endl;
+            break; 
+        
+        case 2: 
+        cout << endl;
+        cout <<  "************************************************..." << endl;
+        cout << "Course Id / Course name" << endl;
+        cout <<  "************************************************..." << endl; 
+        b_S_T->PrintCourse(b_S_T->root); 
+        cout << endl; 
+        break; 
+
+
+        case 3:
+          cout << endl;
+          cout << "what course are you interested in?";
+          cin >> cChoice;
+          cout << endl;
+
+          std::transform(cChoice.begin(), cChoice.end(), cChoice.begin(), ::toupper);
+          b_S_T->Search(cChoice);
+          cout << endl; 
+          break; 
+
+          case 9:
+              cout << "Hope our Course Planner was of hope, thank you for choosing us!" <<endl; 
+              break; 
+              default:
+              cout << userInput << "option unvalid, please try again." << endl << endl; //if command couldn't be done 
+              break; 
+        }
+
+    }
+
+}
